@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Playback Test - Multi-Source with JioSaavn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .track {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .track:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .track img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            float: left;
+        }
+        .track-info {
+            margin-left: 75px;
+        }
+        .track-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .track-artist {
+            color: #ddd;
+            font-size: 14px;
+        }
+        .track-source {
+            color: #ffd700;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .status {
+            background: rgba(0, 255, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 4px solid #f44336;
+        }
+        .source-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .source-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .source-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .source-btn.active {
+            background: #4CAF50;
+        }
+        .play-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .play-button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Multi-Source Music Player</h1>
+        <div id="status" class="status">
+            ✅ Multi-Source Music API with JioSaavn is running and ready!
+        </div>
+        
+        <div class="source-buttons">
+            <button class="source-btn active" onclick="setSource('all')">All Sources</button>
+            <button class="source-btn" onclick="setSource('jiosaavn')">JioSaavn</button>
+        </div>
+        
+        <input type="text" id="searchInput" class="search-box" placeholder="Search for music (e.g., despacito, arijit singh, ed sheeran, taylor swift)">
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        let currentSource = 'all';
+        
+        // Test API connection
+        async function testAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    document.getElementById('status').innerHTML = '✅ Multi-Source Music API with JioSaavn is running and ready!';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = '❌ API connection failed. Make sure the backend is running.';
+                document.getElementById('status').classList.add('error');
+            }
+        }
+        
+        // Set search source
+        function setSource(source) {
+            currentSource = source;
+            document.querySelectorAll('.source-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Clear results and search again
+            document.getElementById('results').innerHTML = '';
+            const query = document.getElementById('searchInput').value.trim();
+            if (query.length > 2) {
+                searchMusic(query);
+            }
+        }
+        
+        // Search for music
+        async function searchMusic(query) {
+            try {
+                let endpoint = '/search';
+                if (currentSource === 'jiosaavn') {
+                    endpoint = '/jiosaavn/search';
+                }
+                
+                const response = await fetch(`${API_BASE}${endpoint}?query=${encodeURIComponent(query)}&limit=10`);
+                if (response.ok) {
+                    const tracks = await response.json();
+                    displayResults(tracks);
+                } else {
+                    throw new Error('Search failed');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                document.getElementById('results').innerHTML = '<div class="error">❌ Search failed. Please try again.</div>';
+            }
+        }
+        
+        // Display search results
+        function displayResults(tracks) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            if (tracks.length === 0) {
+                resultsDiv.innerHTML = '<div class="error">No tracks found. Try a different search term.</div>';
+                return;
+            }
+            
+            tracks.forEach(track => {
+                const trackDiv = document.createElement('div');
+                trackDiv.className = 'track';
+                
+                trackDiv.innerHTML = `
+                    <img src="${track.image}" alt="${track.title}" onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=60&h=60&fit=crop'">
+                    <div class="track-info">
+                        <div class="track-title">${track.title}</div>
+                        <div class="track-artist">${track.artist}</div>
+                        <div class="track-source">${track.source || 'Unknown'} • ${track.genre || 'Music'}</div>
+                    </div>
+                    <button class="play-button" onclick="playTrack('${track.id}', '${track.source}')">▶️ Play</button>
+                `;
+                
+                resultsDiv.appendChild(trackDiv);
+            });
+        }
+        
+        // Play track
+        function playTrack(trackId, source) {
+            console.log('Playing track:', trackId, 'from source:', source);
+            
+            if (source === 'jiosaavn') {
+                // For JioSaavn tracks, try to play the direct URL
+                const track = findTrackById(trackId);
+                if (track && track.preview_url) {
+                    // Try to play in browser first
+                    const audio = new Audio(track.preview_url);
+                    audio.play().catch(error => {
+                        console.log('Audio playback failed, opening in new tab');
+                        window.open(track.preview_url, '_blank');
+                    });
+                } else {
+                    console.log('No preview URL found for this track.');
+                }
+            }
+        }
+        
+        // Find track by ID
+        function findTrackById(trackId) {
+            // This would need to be implemented to find the track in the current results
+            // For now, we'll just return null
+            return null;
+        }
+        
+        // Search input handler
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length > 2) {
+                searchTimeout = setTimeout(() => {
+                    searchMusic(query);
+                }, 500);
+            }
+        });
+        
+        // Initialize
+        testAPI();
+        
+        // Auto-search for trending music on load
+        setTimeout(() => {
+            searchMusic('trending music 2024');
+        }, 1000);
+    </script>
+</body>
+</html> 
