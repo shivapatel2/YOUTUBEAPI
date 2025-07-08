@@ -20,7 +20,7 @@ def search():
                 'id': item.get('videoId'),
                 'title': item.get('title'),
                 'artist': ', '.join([a['name'] for a in item.get('artists', [])]),
-                'album': item.get('album', {}).get('name', ''),
+                'album': (item.get('album') or {}).get('name', ''),
                 'duration': item.get('duration_seconds', 0),
                 'image': item.get('thumbnails', [{}])[-1].get('url', ''),
                 'source': 'youtube_music',

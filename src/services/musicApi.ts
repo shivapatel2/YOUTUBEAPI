@@ -125,11 +125,11 @@ const getDemoTracks = (): MusicTrack[] => {
 export const searchTracks = async (query: string, limit: number = 20): Promise<MusicTrack[]> => {
   try {
     console.log('Searching JioSaavn for:', query);
-    const jiosaavnTracks = await searchTracksJioSaavn(query, limit);
-    if (jiosaavnTracks.length > 0) {
-      console.log(`Found ${jiosaavnTracks.length} tracks from JioSaavn for query: ${query}`);
-      return jiosaavnTracks;
-    }
+      const jiosaavnTracks = await searchTracksJioSaavn(query, limit);
+      if (jiosaavnTracks.length > 0) {
+        console.log(`Found ${jiosaavnTracks.length} tracks from JioSaavn for query: ${query}`);
+        return jiosaavnTracks;
+      }
     console.log('No tracks found from JioSaavn, using demo tracks');
     return getDemoTracks();
   } catch (error) {
