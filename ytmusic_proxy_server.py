@@ -10,6 +10,10 @@ from urllib.parse import urlparse, parse_qs
 import sys
 sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
+import time
+
+stream_url_cache = {}  # video_id: (audio_url, expiry_time)
+CACHE_TTL = 20 * 60  # 20 minutes
 
 COOKIES_URL = "https://drive.google.com/uc?export=download&id=1nnF81yHbc9whn9ooEd79ggmnRZp-k60L"
 COOKIES_PATH = "music.youtube.com_cookies.txt"
@@ -142,6 +146,16 @@ def search():
 def stream_audio(video_id):
     """Stream audio from YouTube Music using yt-dlp"""
     try:
+        now = time.time()
+        # Check cache first
+        if video_id in stream_url_cache:
+            audio_url, expiry = stream_url_cache[video_id]
+            if now < expiry:
+                print(f"Cache hit for {video_id}")
+                return redirect(audio_url, code=302)
+            else:
+                del stream_url_cache[video_id]  # Expired
+        
         url = f"https://music.youtube.com/watch?v={video_id}"
         print(f"Attempting to stream audio for video ID: {video_id}")
         
@@ -178,7 +192,8 @@ def stream_audio(video_id):
             audio_url = result.stdout.strip()
             print(f"Extracted audio URL: {audio_url[:100]}...")
             if audio_url:
-                # Redirect the client directly to the audio URL
+                # Cache the result
+                stream_url_cache[video_id] = (audio_url, now + CACHE_TTL)
                 return redirect(audio_url, code=302)
             else:
                 print("No audio URL extracted")
