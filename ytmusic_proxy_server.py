@@ -11,6 +11,16 @@ import sys
 sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
+COOKIES_URL = "https://drive.google.com/uc?export=download&id=128BDfPcWL0mefavwSW4hsieufUfeCiKe"
+COOKIES_PATH = "music.youtube.com_cookies.txt"
+
+if not os.path.exists(COOKIES_PATH):
+    print("Downloading cookies file from Google Drive...")
+    r = requests.get(COOKIES_URL)
+    with open(COOKIES_PATH, "wb") as f:
+        f.write(r.content)
+    print("Cookies file downloaded.")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -32,6 +42,7 @@ def stream_video(video_id):
             '--no-playlist',
             '--no-warnings',
             '--quiet',
+            '--cookies', 'music.youtube.com_cookies.txt',
             url
         ]
 
@@ -134,7 +145,8 @@ def stream_audio(video_id):
         url = f"https://music.youtube.com/watch?v={video_id}"
         print(f"Attempting to stream audio for video ID: {video_id}")
         
-        # Use yt-dlp to extract audio stream with better options
+        # NOTE: To bypass YouTube's bot check, you must upload a valid music.youtube.com_cookies.txt file from your browser (while logged in to YouTube Music) to the same directory as this script.
+        # See: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
         cmd = [
             'yt-dlp',
             '--extract-audio',
@@ -144,6 +156,7 @@ def stream_audio(video_id):
             '--no-playlist',
             '--no-warnings',
             '--quiet',
+            '--cookies', 'music.youtube.com_cookies.txt',
             url
         ]
         
@@ -211,6 +224,7 @@ def download_audio(video_id):
             'yt-dlp',
             '--dump-json',
             '--no-playlist',
+            '--cookies', 'music.youtube.com_cookies.txt',
             url
         ]
         
@@ -228,6 +242,7 @@ def download_audio(video_id):
                 '--audio-format', 'mp3',
                 '--audio-quality', '0',
                 '--output', f'{title}.%(ext)s',
+                '--cookies', 'music.youtube.com_cookies.txt',
                 url
             ]
             
@@ -258,6 +273,7 @@ def get_video_info(video_id):
             'yt-dlp',
             '--dump-json',
             '--no-playlist',
+            '--cookies', 'music.youtube.com_cookies.txt',
             url
         ]
         
