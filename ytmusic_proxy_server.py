@@ -47,7 +47,7 @@ def stream_video(video_id):
         ]
 
         print(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
 
         if result.returncode == 0:
             video_url = result.stdout.strip()
@@ -161,7 +161,7 @@ def stream_audio(video_id):
         ]
         
         print(f"Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
         print(f"yt-dlp return code: {result.returncode}")
         print(f"yt-dlp stdout: {result.stdout}")
         print(f"yt-dlp stderr: {result.stderr}")
@@ -228,7 +228,7 @@ def download_audio(video_id):
             url
         ]
         
-        result = subprocess.run(cmd_info, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd_info, capture_output=True, text=True, timeout=90)
         
         if result.returncode == 0:
             video_info = json.loads(result.stdout)
@@ -246,7 +246,7 @@ def download_audio(video_id):
                 url
             ]
             
-            result = subprocess.run(cmd_download, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd_download, capture_output=True, text=True, timeout=90)
             
             if result.returncode == 0:
                 return jsonify({
@@ -277,7 +277,7 @@ def get_video_info(video_id):
             url
         ]
         
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
         
         if result.returncode == 0:
             video_info = json.loads(result.stdout)
