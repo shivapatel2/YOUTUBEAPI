@@ -11,7 +11,7 @@ import sys
 sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
-COOKIES_URL = "https://drive.google.com/uc?export=download&id=128BDfPcWL0mefavwSW4hsieufUfeCiKe"
+COOKIES_URL = "https://drive.google.com/uc?export=download&id=1mBKG8xhynfdIuTWddIEl3WPYTRc5Ig_R"
 COOKIES_PATH = "music.youtube.com_cookies.txt"
 
 if not os.path.exists(COOKIES_PATH):
