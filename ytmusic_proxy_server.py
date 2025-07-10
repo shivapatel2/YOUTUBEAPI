@@ -7,6 +7,9 @@ import subprocess
 import os
 import tempfile
 from urllib.parse import urlparse, parse_qs
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
 
 app = Flask(__name__)
 CORS(app)
@@ -149,6 +152,14 @@ def stream_audio(video_id):
         print(f"yt-dlp return code: {result.returncode}")
         print(f"yt-dlp stdout: {result.stdout}")
         print(f"yt-dlp stderr: {result.stderr}")
+        # Write errors to a file for debugging
+        if result.returncode != 0 or not result.stdout.strip():
+            with open("yt-dlp-error.log", "a") as f:
+                f.write(f"video_id: {video_id}\n")
+                f.write(f"yt-dlp return code: {result.returncode}\n")
+                f.write(f"yt-dlp stdout: {result.stdout}\n")
+                f.write(f"yt-dlp stderr: {result.stderr}\n")
+                f.write("-" * 40 + "\n")
         
         if result.returncode == 0:
             audio_url = result.stdout.strip()
