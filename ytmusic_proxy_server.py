@@ -146,6 +146,9 @@ def stream_audio(video_id):
         
         print(f"Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        print(f"yt-dlp return code: {result.returncode}")
+        print(f"yt-dlp stdout: {result.stdout}")
+        print(f"yt-dlp stderr: {result.stderr}")
         
         if result.returncode == 0:
             audio_url = result.stdout.strip()
@@ -175,6 +178,7 @@ def stream_audio(video_id):
         else:
             print(f"yt-dlp failed with return code: {result.returncode}")
             print(f"yt-dlp stderr: {result.stderr}")
+            return jsonify({'error': 'Failed to extract audio stream', 'yt_dlp_stderr': result.stderr}), 500
         
         return jsonify({'error': 'Failed to extract audio stream'}), 500
         
