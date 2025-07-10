@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, redirect
 from flask_cors import CORS
 import requests
 import re
@@ -178,25 +178,8 @@ def stream_audio(video_id):
             audio_url = result.stdout.strip()
             print(f"Extracted audio URL: {audio_url[:100]}...")
             if audio_url:
-                # Proxy the audio stream with better headers
-                response = requests.get(audio_url, stream=True)
-                print(f"Audio stream response status: {response.status_code}")
-                print(f"Audio stream content type: {response.headers.get('content-type')}")
-                
-                flask_response = Response(
-                    response.iter_content(chunk_size=16384),  # Larger chunk size for better performance
-                    content_type='audio/mpeg',
-                    headers={
-                        'Content-Length': response.headers.get('content-length', ''),
-                        'Accept-Ranges': 'bytes',
-                        'Cache-Control': 'no-cache',
-                        'Connection': 'keep-alive'
-                    }
-                )
-                flask_response.headers['Access-Control-Allow-Origin'] = '*'
-                flask_response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-                flask_response.headers['Access-Control-Allow-Headers'] = 'Range'
-                return flask_response
+                # Redirect the client directly to the audio URL
+                return redirect(audio_url, code=302)
             else:
                 print("No audio URL extracted")
         else:
